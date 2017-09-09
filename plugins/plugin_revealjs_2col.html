@@ -1,0 +1,53 @@
+<script type="text/javascript">
+/* 2カラムにするHTMLオブジェクトを取得 */
+var myElements = document.getElementsByClassName('twocol');
+
+/* 2カラム化 */
+for(var i = 0; i < myElements.length; i++){
+  
+  /* 変数定義 */
+  var myChildren = myElements[i].children;
+  var leftIndex = -1;
+  var rightIndex = -1;
+  
+  /* leftとrightのインデックス取得 */
+  for(var index = 0; index < myChildren.length; index++){
+    if(myChildren[index].classList.contains('left')){
+      leftIndex = index;
+    }
+    if(myChildren[index].classList.contains('right')){
+      rightIndex = index;
+    }
+  }
+
+  /* leftとrightのインデックスを元に対象を配列化 */
+  var leftElement = [];
+  for(var index = leftIndex; index < rightIndex; index++){
+    leftElement.push(myChildren[index]);
+  }
+  var rightElement = [];
+  for(var index = rightIndex; index < myChildren.length; index++){
+    rightElement.push(myChildren[index]);
+  }
+  
+  /* leftの対象をcolumn1に移す */
+  var leftWrapDiv = document.createElement('div');
+  leftWrapDiv.setAttribute('class', 'column1');
+  myChildren[leftIndex].parentNode.insertBefore(leftWrapDiv, myChildren[leftIndex]);
+  for(var index = 0; index < leftElement.length; index++){
+    leftWrapDiv.appendChild(leftElement[index]);
+  }
+  
+  /* rightの対象をcolumn2に移す */
+  var rightWrapDiv = document.createElement('div');
+  rightWrapDiv.setAttribute('class', 'column2');
+  myChildren[leftIndex].parentNode.insertBefore(rightWrapDiv, myChildren[rightIndex]);
+  for(var index = 0; index < rightElement.length; index++){
+    rightWrapDiv.appendChild(rightElement[index]);
+  }
+  
+  /* column1とcolumn2にstyleを付与 */
+  leftWrapDiv.setAttribute('style', 'float: left; width: 49%;');
+  rightWrapDiv.setAttribute('style', 'float: right; width: 49%');
+}
+</script>
