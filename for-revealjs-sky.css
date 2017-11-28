@@ -26,6 +26,10 @@
   text-align:left;
 }
 
+.reveal .small {
+  font-size: 0.75em;
+}
+
 /* title-slide setting */
 
 h1.title {
@@ -53,6 +57,9 @@ h1.subtitle {
 span.header-section-number {
   margin-right: 0.5em;
 }
+
+/* list setting */
+
 .reveal li {
   margin-top:0.2em;
 }
@@ -60,6 +67,25 @@ span.header-section-number {
   font-size:0.85em;
   margin-top:0;
 }
+
+/* botsu
+dl {
+  font-size: 0.80em;
+}
+dt {
+  clear: left;
+  float: left;
+  width: 20%;
+  font-weight: bold;
+  text-align: right;
+  padding: 3px 15px 3px 0;
+}
+dd {
+  margin: 0 0 0 25%;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+*/
 
 /* image setting */
 .reveal img {
@@ -75,6 +101,12 @@ span.header-section-number {
 }
 .reveal table td {
   border-style: solid;
+}
+
+/* nomark list */
+
+.nomark ul {
+  list-style-type: none;
 }
 
 /* for plotly */
