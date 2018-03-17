@@ -1,26 +1,20 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>rtweet&amp;rmarkdownで収集フォトギャラリーを作る</title>
-    <meta charset="utf-8">
-    <meta name="author" content="前田和寛(@kazutan)" />
-    <link href="fukuokaR10_slide_files/remark-css-0.0.1/metropolis.css" rel="stylesheet" />
-    <link href="fukuokaR10_slide_files/remark-css-0.0.1/metropolis-fonts.css" rel="stylesheet" />
-    <link rel="stylesheet" href="for_xaringan.css" type="text/css" />
-  </head>
-  <body>
-    <textarea id="source">
-class: center, middle, inverse, title-slide
-
-# rtweet&amp;rmarkdownで収集フォトギャラリーを作る
-## fukuoka.R #10
-### 前田和寛(<span class="citation">@kazutan</span>)
-### 2018年3月17日
-
+---
+title: "rtweet&rmarkdownで収集フォトギャラリーを作る"
+subtitle: "fukuoka.R #10 "
+author: "前田和寛(@kazutan)"
+date: "2018年3月17日"
+output:
+  xaringan::moon_reader:
+    css: ["metropolis","metropolis-fonts", "for_xaringan.css"]
+    md_extention: "-ascii_identifiers"
 ---
 
-
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      eval = FALSE,
+                      warning = FALSE, 
+                      message = FALSE)
+```
 
 # 自己紹介
 
@@ -157,13 +151,12 @@ layout: true
     - 認証情報はEnvironmentとして保持される
     - これらの情報は残らないよう気をつける
 
-
-```r
+```{r}
 # パッケージ読み込み
 library(rtweet)
 
 # twitterのトークンを取得
-twitter_token &lt;- create_token(
+twitter_token <- create_token(
   app = readLines(".rtweet_tokens")[1],
   consumer_key = readLines(".rtweet_tokens")[2],
   consumer_secret = readLines(".rtweet_tokens")[3]
@@ -180,10 +173,9 @@ twitter_token &lt;- create_token(
     - ただし通常のトークンでは**約一週間分**のみ
     - retweetを含むかどうかは引数で指定
 
-
-```r
+```{r}
 # 過去一週間のビール関連ツイートを取得(RTなし)
-rt &lt;- search_tweets("#ビール", n = 10000, include_rts = FALSE)
+rt <- search_tweets("#ビール", n = 10000, include_rts = FALSE)
 ```
 
 ---
@@ -214,14 +206,13 @@ layout: true
 - いわゆる前処理
     - rtweetで取得したデータは、一部nestされている(list)列があるので注意
 
-
-```r
-beer_df &lt;- rt %&gt;% 
-  select(status_id, created_at, user_id, screen_name, text, media_url, retweet_count, favorite_count) %&gt;% 
-  unnest() %&gt;% 
-  drop_na(media_url) %&gt;% 
-  mutate(url = paste0("https://twitter.com/", screen_name, "/status/", status_id)) %&gt;% 
-  filter(favorite_count &gt;= 1, retweet_count &gt;= 1)
+```{r}
+beer_df <- rt %>% 
+  select(status_id, created_at, user_id, screen_name, text, media_url, retweet_count, favorite_count) %>% 
+  unnest() %>% 
+  drop_na(media_url) %>% 
+  mutate(url = paste0("https://twitter.com/", screen_name, "/status/", status_id)) %>% 
+  filter(favorite_count >= 1, retweet_count >= 1)
 ```
 
 ---
@@ -232,13 +223,12 @@ beer_df &lt;- rt %&gt;%
     - さきほど作ったbeer_dfから作成
     - ほしいのは件数だけなので`dplyr::n()`でOK
 
-
-```r
-beer_friends &lt;- beer_df %&gt;% 
-  group_by(screen_name) %&gt;% 
-  summarise(count = n()) %&gt;% 
-  arrange(desc(count)) %&gt;% 
-  filter(count &gt;= 3)
+```{r}
+beer_friends <- beer_df %>% 
+  group_by(screen_name) %>% 
+  summarise(count = n()) %>% 
+  arrange(desc(count)) %>% 
+  filter(count >= 3)
 ```
 
 ---
@@ -248,11 +238,10 @@ beer_friends &lt;- beer_df %&gt;%
 - `rtweet::lookup_users()`でまとめて持ってこれる
     - あとは適宜修正し、2.2で算出した件数をjoinさせる
 
-
-```r
-beer_friends_user_df &lt;- lookup_users(beer_friends$screen_name) %&gt;% 
-  select(user_id, name, screen_name, location, description, profile_image_url) %&gt;% 
-  mutate(url = paste0("https://twitter.com/", screen_name)) %&gt;% 
+```{r}
+beer_friends_user_df <- lookup_users(beer_friends$screen_name) %>% 
+  select(user_id, name, screen_name, location, description, profile_image_url) %>% 
+  mutate(url = paste0("https://twitter.com/", screen_name)) %>% 
   left_join(beer_friends, by = "screen_name")
 ```
 
@@ -277,10 +266,9 @@ layout: true
 
 ### 3.1 ビール画像ギャラリーを作成
 
-
-```r
+```{r}
 # ギャラリー生成用関数の準備
-fn_gallery &lt;- function(src, alt, base_url) {
+fn_gallery <- function(src, alt, base_url) {
   tags$div(class = "col-sm-3 unit",
            tags$img(src = src, alt = alt),
            tags$br(),
@@ -291,10 +279,9 @@ fn_gallery &lt;- function(src, alt, base_url) {
 
 ---
 
-
-```r
+```{r}
 # ギャラリーのコンテンツを一気に作成
-beer_gallery_contents &lt;- mapply(fn_gallery,
+beer_gallery_contents <- mapply(fn_gallery,
                                 src = beer_df$media_url,
                                 alt = beer_df$text,
                                 base_url = beer_df$url,
@@ -304,11 +291,10 @@ beer_gallery_contents &lt;- mapply(fn_gallery,
 
 ---
 
-
-```r
+```{r}
 # コンテンツをdivに括って文字列化
-div_beer_gallery &lt;- tags$div(class = "images", beer_gallery_contents) %&gt;% 
-  as.character() %&gt;% 
+div_beer_gallery <- tags$div(class = "images", beer_gallery_contents) %>% 
+  as.character() %>% 
   str_replace_all("\n +", "\n")
 
 # htmlファイルとして書き出し
@@ -319,19 +305,18 @@ writeLines(div_beer_gallery, "_div_beer_gallery.html", sep = '')
 
 ### 3.2 beer friends一覧表を作成
 
-
-```r
+```{r}
 # imgタグをaタグで覆うための関数を準備
-make_icon_tags &lt;- function(src, href) {
+make_icon_tags <- function(src, href) {
   tags$a(href = href,
-         tags$img(src = src)) %&gt;% 
+         tags$img(src = src)) %>% 
     as.character()
 }
 
 # 一覧表用のdata.frameを作成してそのまま表へ
-beer_friends_user_table &lt;- beer_friends_user_df %&gt;% 
-  mutate(icon = mapply(make_icon_tags, .$profile_image_url, .$url, SIMPLIFY = FALSE, USE.NAMES = FALSE)) %&gt;% 
-  select(icon, name, screen_name, description, count) %&gt;% 
+beer_friends_user_table <- beer_friends_user_df %>% 
+  mutate(icon = mapply(make_icon_tags, .$profile_image_url, .$url, SIMPLIFY = FALSE, USE.NAMES = FALSE)) %>% 
+  select(icon, name, screen_name, description, count) %>% 
   datatable()
 
 # htmlwidgetsとして保存
@@ -422,7 +407,7 @@ navbar:
     href: beer_gallery.html
   - text: friends
     href: beer_friends.html
-date: "2018/03/17"
+date: "`r format(Sys.time(),'%Y/%m/%d')`"
 exclude: ["csvs"]
 output:
   zousan::zousan_document:
@@ -437,8 +422,7 @@ output_dir: docs
 
 この1行でOK
 
-
-```r
+```{r}
 rmarkdown::render_site(output_format = "zousan::zousan_document")
 ```
 
@@ -468,36 +452,5 @@ layout: false
 - [R Markdown入門 - Kazutan.R](https://kazutan.github.io/kazutanR/Rmd_intro.html)
 - [htmltoolsパッケージでHTMLタグを生成する](https://qiita.com/kazutan/items/897a5f78846ebe185485)
 - [R MarkdownでWebサイト生成しよう](https://kazutan.github.io/RmdSite_tuto/)
-    </textarea>
-<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
-<script>var slideshow = remark.create();
-if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
-  window.dispatchEvent(new Event('resize'));
-});
-(function() {
-  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
-  if (!r) return;
-  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
-  d.head.appendChild(s);
-})();</script>
 
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-  tex2jax: {
-    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-  }
-});
-</script>
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-(function () {
-  var script = document.createElement('script');
-  script.type = 'text/javascript';
-  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
-  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
-    script.src  = script.src.replace(/^https?:/, '');
-  document.getElementsByTagName('head')[0].appendChild(script);
-})();
-</script>
-  </body>
-</html>
+
