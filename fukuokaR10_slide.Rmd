@@ -207,6 +207,9 @@ layout: true
     - rtweetで取得したデータは、一部nestされている(list)列があるので注意
 
 ```{r}
+library(tidyverse)
+library(lubridate)
+
 beer_df <- rt %>% 
   select(status_id, created_at, user_id, screen_name, text, media_url, retweet_count, favorite_count) %>% 
   unnest() %>% 
@@ -267,6 +270,9 @@ layout: true
 ### 3.1 ビール画像ギャラリーを作成
 
 ```{r}
+library(htmltools)
+library(DT)
+
 # ギャラリー生成用関数の準備
 fn_gallery <- function(src, alt, base_url) {
   tags$div(class = "col-sm-3 unit",

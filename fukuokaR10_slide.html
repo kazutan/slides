@@ -216,6 +216,9 @@ layout: true
 
 
 ```r
+library(tidyverse)
+library(lubridate)
+
 beer_df &lt;- rt %&gt;% 
   select(status_id, created_at, user_id, screen_name, text, media_url, retweet_count, favorite_count) %&gt;% 
   unnest() %&gt;% 
@@ -279,6 +282,9 @@ layout: true
 
 
 ```r
+library(htmltools)
+library(DT)
+
 # ギャラリー生成用関数の準備
 fn_gallery &lt;- function(src, alt, base_url) {
   tags$div(class = "col-sm-3 unit",
